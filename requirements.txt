@@ -1,0 +1,13 @@
+matplotlib
+numpy
+torch>=2.0.0
+torchvision
+setuptools
+networkx
+djitellopy
+transformers
+ctransformers
+accelerate
+langchain
+bitsandbytes
+langchain-community
