@@ -1,6 +1,8 @@
 # AUTODRONE Project
 Automatic drone pathfinding and navigation
 
+A framework to allow drones to navigate and be issued commands.
+
 ## Prerequisites
 
 First, Blender must be installed, using `sudo snap install blender --classic`

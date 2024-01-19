@@ -45,7 +45,9 @@ class DronePiloter:
         normalized_desired_orientation = normalize(desired_velocity)
 
         # First orient towards the velocity vector (only for yaw)
-        desired_orientation = vector_to_euler(normalized_desired_orientation, origin=(0, 0, -1)).z
+        desired_orientation = vector_to_euler(
+            normalized_desired_orientation, origin=(0, 0, -1)
+        ).z
         rotation = self.rotation_euler.z - desired_orientation
 
         if rotation > 0:
