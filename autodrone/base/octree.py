@@ -75,16 +75,17 @@ class Octree:
 
             neighbours_final = [i[0] for i in neighbours_sorted[:top_k_neighbors]]
 
-            # TODO : disallow moving into an occupied cell !
-
             for n in neighbours_final:
-                G.add_edge(
-                    cell.id,
-                    n.id,
-                    weight=euclidian_distance(
-                        cell.center, n.center
-                    ),  # Plus the edge weight which is the distance
-                )
+                if not n.is_occupied:  # Disallow moving into an occupied cell !
+                    # TODO : what if we move from unoccupied to unoccupied, but cross an occupied cell while doing so ?
+                    # I need to make heavy modifs to the way neighbors are found
+                    G.add_edge(
+                        cell.id,
+                        n.id,
+                        weight=euclidian_distance(
+                            cell.center, n.center
+                        ),  # Plus the edge weight which is the distance
+                    )
         return G
 
     def get_all_cells(self, leaf_nodes_only=False):

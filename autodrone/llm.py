@@ -32,8 +32,6 @@ from pydantic import BaseModel, PrivateAttr, computed_field
 
 class SimpleLLMAgent:
     """
-    For Aziz.
-
     Simple LLMAgent using HuggingFace-style code.
     """
 
@@ -149,18 +147,44 @@ class RAG_LLMAgent:
         result = rag_chain.invoke(question)
         return result
 
-    def _create_retriever(self, list_of_urls=["https://www.lipsum.com/feed/html"]):
+    @staticmethod
+    def _retrieve_urls(list_of_urls=["https://www.lipsum.com/feed/html"]):
+        """Converts URL content to text document
+
+        Args:
+            list_of_urls (List[str]): List of URLS
+
+        Returns:
+            docs (List[langchain_core.documents.Document])
+        """
         # Scrapes the URLs above containing the articles to index
         loader = AsyncChromiumLoader(list_of_urls)
-        docs = loader.load()
+        docs = loader.load()  # Docs is a List[Documents]
 
         # Converts HTML to text, and then chunk it
         html2text = Html2TextTransformer()
         docs_transformed = html2text.transform_documents(docs)
+
+        return docs_transformed
+
+    @staticmethod
+    def _text_to_document(text: str):
+        return Document(page_content=text)
+
+    def _create_retriever(self, list_of_urls=None, text=None):
+        if list_of_urls is not None:
+            docs_transformed = self._retrieve_urls(list_of_urls)
+        if text is not None:
+            docs_transformed = self._text_to_document(text)
+        if (list_of_urls is None) and (text is None):
+            raise ValueError("Need at least one of list_of_urls or text")
+        if (list_of_urls is not None) and (text is not None):
+            raise ValueError("Cannot specify both list_of_urls and text")
+
         text_splitter = CharacterTextSplitter(chunk_size=100, chunk_overlap=0)
         chunked_documents = text_splitter.split_documents(docs_transformed)
 
-        # Load chunked documents into the FAISS index
+        # Load chunked documents into the FAISS index (vectorizing them)
         db = Faiss.from_documents(
             chunked_documents,
             HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2"),

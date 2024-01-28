@@ -112,14 +112,21 @@ class FlowField(Octree):
         dist_threshold_graph_conversion=100,
         top_k_neighbors_graph_conversion=8,
     ):
+        # Turn the octree into a graph once and for all
+        print("Graphing...")
+        scene_graph = self.to_graph(
+            dist_threshold=dist_threshold_graph_conversion,
+            top_k_neighbors=top_k_neighbors_graph_conversion,
+        )
+        print("Done.")
+
         for cell in self.get_all_cells():
             print("NEW CELL")
             path = pathfinder.pathfind(
-                self,
-                cell.center,
-                endpos,
-                dist_threshold_graph_conversion,
-                top_k_neighbors_graph_conversion,
+                scene_octree=self,
+                scene_graph=scene_graph,
+                startpos=cell.center,
+                endpos=endpos,
             )
 
             print("PATH", path)

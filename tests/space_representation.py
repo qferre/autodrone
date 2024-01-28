@@ -19,9 +19,6 @@ space.octree.populate_self(
     endpos=bpy.data.objects["Destination"].location,
     pathfinder=Pathfinder(),
     dist_threshold_graph_conversion=100,
-    top_k_neighbors_graph_conversion=2,
+    top_k_neighbors_graph_conversion=20,
 )
 space.octree.produce_visualisation()
-
-"""TODO : the scene_ocree.to_graph() call is very expensive (A* itself is quite fast) so need to refacto so
-it's done only once."""

@@ -5,10 +5,9 @@ class Pathfinder:
     @staticmethod
     def pathfind(
         scene_octree,
+        scene_graph,
         startpos,
         endpos,
-        dist_threshold_graph_conversion,
-        top_k_neighbors_graph_conversion,
     ):
         path = []
         start_cell = scene_octree.get_closest_cell_to_position(startpos)
@@ -19,13 +18,6 @@ class Pathfinder:
         #     start_cell.center.y - startpos.y,
         #     start_cell.center.z - startpos.z,
         # )]
-
-        print("Graphing...")
-        scene_graph = scene_octree.to_graph(
-            dist_threshold=dist_threshold_graph_conversion,
-            top_k_neighbors=top_k_neighbors_graph_conversion,
-        )
-        print("Done.")
 
         # Complete path to end cell
         end_cell = scene_octree.get_closest_cell_to_position(endpos)
