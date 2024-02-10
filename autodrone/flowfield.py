@@ -34,7 +34,7 @@ class OctreeVectorNode(OctreeNode):
         self._is_occupied = value
 
     def __str__(self) -> str:
-        return f"Octree Node {self.id}, center {self.center}, size {self.size}, is occupied {self.is_occupied}, children {self.children}"
+        return super().__str__() + f", is occupied {self.is_occupied}"
 
     def check_if_is_occupied(self, face_points_subdivision=4):
         """
@@ -115,8 +115,8 @@ class FlowField(Octree):
         self,
         endpos,
         pathfinder: Pathfinder,
-        dist_threshold_graph_conversion=100,
-        top_k_neighbors_graph_conversion=8,
+        dist_threshold_graph_conversion=120,
+        top_k_neighbors_graph_conversion=20,
     ):
         # Turn the octree into a graph once and for all
         print("Graphing...")
@@ -158,14 +158,18 @@ class FlowField(Octree):
             cell.vector = Vector((dx, dy, dz))
             print(cell.vector)
 
-    def produce_visualisation(self):
+    def produce_visualisation(self, visibility_scale_factor=0.5):
         for cell in self.get_all_cells(leaf_nodes_only=True):
             empty = bpy.data.objects.new(name="new empty", object_data=None)
             bpy.context.collection.objects.link(empty)
             empty.empty_display_type = "SINGLE_ARROW"
 
             empty.location = cell.center
-            empty.scale = (-1, -1, -1)  # (1, 1, vector_norm(cell.vector))
+            empty.scale = (
+                -1 * visibility_scale_factor,
+                -1 * visibility_scale_factor,
+                -1 * visibility_scale_factor,
+            )  # (1, 1, vector_norm(cell.vector))
             empty.rotation_euler = vector_to_euler(cell.vector)
             print(empty.rotation_euler)
 

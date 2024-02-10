@@ -15,8 +15,10 @@ class OctreeNode:
             None  # Eight children (sub-nodes). None if none were created yet.
         )
 
+        self.outgoing_graph_edges = 0
+
     def __str__(self) -> str:
-        return f"Octree Node {self.id}, center {self.center}, size {self.size}, is occupied, children {self.children}"
+        return f"Octree Node {self.id}, center {self.center}, size {self.size}, children {self.children}, outgoing_graph_edges {self.outgoing_graph_edges}"
 
     def subdivide(self, node_class=None):
         if node_class is None:
@@ -25,14 +27,13 @@ class OctreeNode:
             self.children = list()
 
             # Subdivide the node into eight child nodes
-            child_size = (
-                self.size / 2
-            )  # TODO :correct value is 4 not 2, because here we have node inflation, but it seems to cause bugs later ? and makes nodes unreachable ?
+            child_size = self.size / 2
             xc, yc, zc = self.center
 
-            x_centers = [xc - child_size, xc + child_size]
-            y_centers = [yc - child_size, yc + child_size]
-            z_centers = [zc - child_size, zc + child_size]
+
+            x_centers = [xc - self.size / 4, xc + self.size / 4]
+            y_centers = [yc - self.size / 4, yc + self.size / 4]
+            z_centers = [zc - self.size / 4, zc + self.size / 4]
 
             child_id = 0
             for i in x_centers:
@@ -78,6 +79,9 @@ class Octree:
 
             neighbours_final = [i[0] for i in neighbours_sorted[:top_k_neighbors]]
 
+            # Record amount of outgoing edges
+            cell.outgoing_graph_edges = 0
+
             for n in neighbours_final:
 
                 # Disallow moving into an occupied cell, and disallow the movement
@@ -97,6 +101,8 @@ class Octree:
                             cell.center, n.center
                         ),  # Plus the edge weight which is the distance
                     )
+
+                    cell.outgoing_graph_edges += 1
         return G
 
     def get_all_cells(self, leaf_nodes_only=False):
