@@ -19,6 +19,6 @@ space.octree.populate_self(
     endpos=bpy.data.objects["Destination"].location,
     pathfinder=Pathfinder(),
     dist_threshold_graph_conversion=100,
-    top_k_neighbors_graph_conversion=20,
+    top_k_neighbors_graph_conversion=15,
 )
 space.octree.produce_visualisation()

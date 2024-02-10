@@ -1,6 +1,7 @@
 import sys
 
-sys.path.append("..")
+sys.path.append("..")  # If called from tests directory
+sys.path.append(".")  # If called from main directory
 
 from autodrone.base.octree import OctreeNode, Octree
 from mathutils import Vector
@@ -9,16 +10,17 @@ from mathutils import Vector
 x = OctreeNode(id=1, center=Vector((0, 0, 0)), size=10)
 x.subdivide()
 
-assert set([n.center for n in x.children]) == set(
+
+assert set([tuple(n.center) for n in x.children]) == set(
     [
-        (-5.0, -5.0, -5.0),
-        (-5.0, -5.0, 5.0),
-        (-5.0, 5.0, -5.0),
-        (-5.0, 5.0, 5.0),
-        (5.0, -5.0, -5.0),
-        (5.0, -5.0, 5.0),
-        (5.0, 5.0, -5.0),
-        (5.0, 5.0, 5.0),
+        (-2.5, -2.5, -2.5),
+        (-2.5, -2.5, 2.5),
+        (-2.5, 2.5, -2.5),
+        (-2.5, 2.5, 2.5),
+        (2.5, -2.5, -2.5),
+        (2.5, -2.5, 2.5),
+        (2.5, 2.5, -2.5),
+        (2.5, 2.5, 2.5),
     ]
 )
 
@@ -26,8 +28,8 @@ assert set([n.center for n in x.children]) == set(
 # Test distance
 t = Octree((0, 0, 0), 10, 10)
 t.root.subdivide()
-closenode = t.get_closest_cell_to_position((5, 5, 5))
-assert closenode.center == (5.0, 5.0, 5.0)
+closenode = t.get_closest_cell_to_position((2.5, 2.5, 2.5))
+assert tuple(closenode.center) == (2.5, 2.5, 2.5)
 assert len(t.get_all_cells(leaf_nodes_only=True)) == 8
 
 

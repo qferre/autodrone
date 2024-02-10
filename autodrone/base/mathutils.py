@@ -52,3 +52,26 @@ def blender_create_cube(center, edge_size, name="Cube"):
     mesh.update()
 
     return obj
+
+
+def blender_raycast(origin, target, ignore_objects=[], max_distance=None):
+    scene = bpy.context.scene
+    direction = target - origin
+    distance = direction.length
+    direction.normalize()
+
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+
+    print("Casting new ray...")
+
+    if max_distance is not None:
+        distance = min(distance, max_distance)
+
+    result, location, normal, index, object, matrix = scene.ray_cast(
+        depsgraph=depsgraph, origin=origin, direction=direction, distance=distance
+    )
+
+    if result:
+        if object not in ignore_objects:
+            return location
+    return None

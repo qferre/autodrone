@@ -33,7 +33,7 @@ drone_piloter = DronePiloter()
 # be updated.
 
 # ------------------------ Command interpretation ---------------------------- #
-# TODO For Aziz : here integrate the LLM module to translate voice commands into a position
+# TODO  integrate the LLM module to translate voice commands into a position
 # target = LLMAgent(
 #     voice_input
 # )

@@ -33,6 +33,9 @@ class OctreeVectorNode(OctreeNode):
     def is_occupied(self, value: object):
         self._is_occupied = value
 
+    def __str__(self) -> str:
+        return f"Octree Node {self.id}, center {self.center}, size {self.size}, is occupied {self.is_occupied}, children {self.children}"
+
     def check_if_is_occupied(self, face_points_subdivision=4):
         """
         If I draw a ray on one face towards the same point on the opposite face,
@@ -50,6 +53,9 @@ class OctreeVectorNode(OctreeNode):
             normal = face.normal
 
             # TODO Check this code (from ChatGPT...) and move it to mathutils !
+
+            # TODO I THINK THIS IS BUGGY, ALL CELLS ARE MARKED AS OCCUPIED
+
             def get_regular_points_on_face(face, num_points):
                 normal = face.normal
                 basis_1 = (
@@ -119,6 +125,15 @@ class FlowField(Octree):
             top_k_neighbors=top_k_neighbors_graph_conversion,
         )
         print("Done.")
+
+        print(scene_graph)
+
+        # import networkx as nx
+
+        # A = nx.nx_agraph.to_agraph(scene_graph)  # convert to a graphviz graph
+        # A.write("k5.dot")  # write to dot file
+        # A.draw("k5.png", prog="neato")
+        # assert False
 
         for cell in self.get_all_cells():
             print("NEW CELL")

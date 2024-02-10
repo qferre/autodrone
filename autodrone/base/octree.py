@@ -1,6 +1,7 @@
 import networkx as nx
 from autodrone.base.mathutils import euclidian_distance
 from mathutils import Vector
+from autodrone.base.mathutils import blender_raycast
 
 
 class OctreeNode:
@@ -15,7 +16,7 @@ class OctreeNode:
         )
 
     def __str__(self) -> str:
-        return f"Octree Node {self.id}, center {self.center}, size {self.size}, is occupied {self.is_occupied}, children {self.children}"
+        return f"Octree Node {self.id}, center {self.center}, size {self.size}, is occupied, children {self.children}"
 
     def subdivide(self, node_class=None):
         if node_class is None:
@@ -24,7 +25,9 @@ class OctreeNode:
             self.children = list()
 
             # Subdivide the node into eight child nodes
-            child_size = self.size / 2
+            child_size = (
+                self.size / 2
+            )  # TODO :correct value is 4 not 2, because here we have node inflation, but it seems to cause bugs later ? and makes nodes unreachable ?
             xc, yc, zc = self.center
 
             x_centers = [xc - child_size, xc + child_size]
@@ -76,9 +79,17 @@ class Octree:
             neighbours_final = [i[0] for i in neighbours_sorted[:top_k_neighbors]]
 
             for n in neighbours_final:
-                if not n.is_occupied:  # Disallow moving into an occupied cell !
-                    # TODO : what if we move from unoccupied to unoccupied, but cross an occupied cell while doing so ?
-                    # I need to make heavy modifs to the way neighbors are found
+
+                # Disallow moving into an occupied cell, and disallow the movement
+                # if a ray trace shows we would cross something.
+                ray_is_blocked_at_this_position = blender_raycast(cell.center, n.center)
+                print(f"BLOCKING {ray_is_blocked_at_this_position}")
+
+                # TODO : do I really need to check if a cell is occupied if I raytrace ?
+
+                # if (not n.is_occupied) and (ray_is_blocked_at_this_position is None):
+                if ray_is_blocked_at_this_position is None:
+                    print("Adding....")
                     G.add_edge(
                         cell.id,
                         n.id,
