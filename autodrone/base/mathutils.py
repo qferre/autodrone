@@ -55,6 +55,7 @@ def blender_create_cube(center, edge_size, name="Cube"):
 
 
 def blender_raycast(origin, target, ignore_objects=[], max_distance=None):
+
     scene = bpy.context.scene
     direction = target - origin
     distance = direction.length

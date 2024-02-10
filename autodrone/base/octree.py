@@ -21,6 +21,7 @@ class OctreeNode:
         return f"Octree Node {self.id}, center {self.center}, size {self.size}, children {self.children}, outgoing_graph_edges {self.outgoing_graph_edges}"
 
     def subdivide(self, node_class=None):
+
         if node_class is None:
             node_class = OctreeNode
         if self.children is None:
@@ -29,7 +30,6 @@ class OctreeNode:
             # Subdivide the node into eight child nodes
             child_size = self.size / 2
             xc, yc, zc = self.center
-
 
             x_centers = [xc - self.size / 4, xc + self.size / 4]
             y_centers = [yc - self.size / 4, yc + self.size / 4]

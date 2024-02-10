@@ -26,11 +26,16 @@ from mathutils import Vector
 
 
 # ------------------- Initialize modules and representation ------------------ #
-scene = SpaceRepresentation()
-pathfinder = Pathfinder()
-drone_piloter = DronePiloter()
+
+# Create a SpaceRepresentaiton based on the currently open Blender file (the file with which the script was called)
+scene = SpaceRepresentation() 
 # NOTE If the scene changes (new obstacles, ...) the SpaceRepresentation must
 # be updated.
+
+# Initialize modules
+pathfinder = Pathfinder()
+drone_piloter = DronePiloter()
+
 
 # ------------------------ Command interpretation ---------------------------- #
 # TODO  integrate the LLM module to translate voice commands into a position
@@ -43,7 +48,7 @@ target = bpy.objects["Target"]
 
 
 # ----------------------------- Pathfinding ---------------------------------- #
-# Now that we have the targets, compute the paths and populate the flowtree
+# Now that we have the targets, compute the paths and populate the flowfield.
 scene.octree.populate_self(navigator.position, target.postion, pathfinder)
 # In theory, as long as the target does not change, we do not need to recompute
 # the paths even if the starting position changes (that's the entire point of

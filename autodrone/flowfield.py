@@ -118,6 +118,7 @@ class FlowField(Octree):
         dist_threshold_graph_conversion=120,
         top_k_neighbors_graph_conversion=20,
     ):
+
         # Turn the octree into a graph once and for all
         print("Graphing...")
         scene_graph = self.to_graph(

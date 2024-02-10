@@ -7,7 +7,7 @@ A framework to allow drones to navigate and be issued commands.
 
 First, Blender must be installed, using `sudo snap install blender --classic`
 
-Also pip install djitellopy networkx numpy
+Also pip install requirements for the Blender python interpreted, since that's the interpreter we will use
 
 ## How to use
 
@@ -30,3 +30,14 @@ With one of the scripts in the /scripts directory. Of course, replace scene.blen
 & python tests/pathfinder.py
 & "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe" scenes/basic.blend --background --python tests/space_representation.py
 blender scenes/basic.blend --background --python tests/space_representation.py
+
+
+
+
+
+
+## Code structures
+
+This section explains the general organization and behavior of the code
+
+The entry point is the `main.py` file

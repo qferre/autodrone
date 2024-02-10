@@ -1,6 +1,7 @@
 # Tello modules
 import djitellopy as dtp
 
+from autodrone.base.mathutils import euclidian_distance, vector_to_euler
 
 class DronePiloter:
     """
@@ -17,16 +18,6 @@ class DronePiloter:
         self.drone = dtp.Tello()
         self.drone.connect()
 
-        self.position = Vector()
-        self.position.x = None
-        self.position.y = None
-        self.position.z = None
-
-        self.rotation_euler = Vector()
-        self.rotation_euler.x = None
-        self.rotation_euler.y = None
-        self.rotation_euler.z = None
-
         # What are my position and rotation ?
         # TODO Find a way to deduce those, or set them at startup.
         self.position, self.rotation_euler = self.infer_position()
@@ -40,6 +31,10 @@ class DronePiloter:
     def infer_position(self):
         # TODO : use cross-view matching to deduce my potential position, or simply use the GNSS chip.
         raise NotImplementedError
+        position = Vector()
+        rotation_euler = Vector()
+
+        return position, rotation_euler
 
     def send_instructions(self, desired_velocity, speed=60):
         normalized_desired_orientation = normalize(desired_velocity)
@@ -48,10 +43,10 @@ class DronePiloter:
         desired_orientation = vector_to_euler(
             normalized_desired_orientation, origin=(0, 0, -1)
         ).z
-        rotation = self.rotation_euler.z - desired_orientation
 
+        rotation = self.rotation_euler.z - desired_orientation
         if rotation > 0:
-            self.drone.rotate_counterclockwise(rotation)
+            self.drone.rotate_counter_clockwise(rotation)
         else:
             self.drone.rotate_clockwise(rotation)
 
@@ -62,6 +57,6 @@ class DronePiloter:
 
         self.drone.send_rc_control(
             left_right_velocity=0,
-            forward_back_velocity=euclidean_distance(projected_on_xy_plane) * speed,
+            forward_back_velocity=euclidian_distance(projected_on_xy_plane) * speed,
             up_down_velocity=normalized_desired_orientation.y * speed,
         )
