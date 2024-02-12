@@ -14,7 +14,7 @@ class SpaceRepresentation:
             (0, 0, 5)
         ),  # Default is center, 5m high, for our test scene.
         scene_diameter=10,  # Default is 10m
-        max_depth_flowfield=13,
+        max_depth_flowfield=4,
     ):
         ## CREATE THE REPRESENTATION
         # Completely fill the space around me with an octree, and subdivide it when needed

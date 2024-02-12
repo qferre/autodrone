@@ -130,6 +130,8 @@ class RAG_LLMAgent:
         {question} [/INST]
         """
 
+        # TODO : make a more suited prompt, like "here is a list of positions in format 'name \t x \t y \z' that you can use when building the trajectories, and keep The output should not be wrapped in a sentence, but rather given directly"
+
         prompt = PromptTemplate(
             input_variables=["context", "question"],
             template=prompt_template,

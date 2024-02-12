@@ -6,6 +6,7 @@ TODO : blender interpreter by default has its workdir in the home dir when run f
 import sys
 from pathlib import Path
 import time
+from autodrone.utils import ArgumentParserForBlender
 
 sys.path.append(".")  # necessary to import script from the blender python interpreter
 
@@ -20,6 +21,12 @@ import bpy
 from mathutils import Vector
 
 
+# Argparser
+parser = ArgumentParserForBlender()
+parser.add_argument("-sp", "--start_pos", type=str, required=True, help="")
+args = parser.parse_args
+
+
 # Before beginning, assert that we are inside a Blender environment, and that
 # there is a mesh representing the real environment available.
 # TODO assert mesh exists
@@ -28,7 +35,7 @@ from mathutils import Vector
 # ------------------- Initialize modules and representation ------------------ #
 
 # Create a SpaceRepresentaiton based on the currently open Blender file (the file with which the script was called)
-scene = SpaceRepresentation() 
+scene = SpaceRepresentation()
 # NOTE If the scene changes (new obstacles, ...) the SpaceRepresentation must
 # be updated.
 
@@ -46,6 +53,9 @@ drone_piloter = DronePiloter()
 navigator = bpy.object["Navigator"]
 target = bpy.objects["Target"]
 
+# TODO : the start position, for now, will be specified by command line I think.
+# The different query positions will be given in an index, and the LLM will just fetch the appropriate ones from this index.
+# The path of the index should be an argument of the command line
 
 # ----------------------------- Pathfinding ---------------------------------- #
 # Now that we have the targets, compute the paths and populate the flowfield.

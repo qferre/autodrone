@@ -36,8 +36,13 @@ blender scenes/basic.blend --background --python tests/space_representation.py
 
 
 
-## Code structures
+## Code structure
 
 This section explains the general organization and behavior of the code
 
 The entry point is the `main.py` file
+
+
+The script must be called with a Blender file like we just said. This file contains a 3D model (presumably of the scene in which you want to navigate).
+
+A SpaceRepresentation object will then be created based on the scene.

@@ -54,7 +54,7 @@ def blender_create_cube(center, edge_size, name="Cube"):
     return obj
 
 
-def blender_raycast(origin, target, ignore_objects=[], max_distance=None):
+def blender_raycast(origin, target, max_distance=None):
 
     scene = bpy.context.scene
     direction = target - origin
@@ -73,6 +73,5 @@ def blender_raycast(origin, target, ignore_objects=[], max_distance=None):
     )
 
     if result:
-        if object not in ignore_objects:
-            return location
+        return location
     return None
