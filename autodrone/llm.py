@@ -30,40 +30,99 @@ from typing import List
 from pydantic import BaseModel, PrivateAttr, computed_field
 
 
-class SimpleLLMAgent:
-    """
-    Simple LLMAgent using HuggingFace-style code.
-    """
+# class SimpleLLMAgent:
+#     """
+#     Simple LLMAgent using HuggingFace-style code.
+#     """
 
-    def __init__(self):
-        print("Creating LLM Agent...")
-        self.model = AutoModelForCausalLM.from_pretrained(
-            "mistralai/Mistral-7B-v0.1",
-            device_map="auto",
-            # load_in_4bit=True
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            "mistralai/Mistral-7B-v0.1", padding_side="left"
-        )
-        print("LLM Agent created.")
+#     def __init__(self):
+#         print("Creating LLM Agent...")
+#         self.model = AutoModelForCausalLM.from_pretrained(
+#             "mistralai/Mistral-7B-v0.1",
+#             device_map="auto",
+#             # load_in_4bit=True
+#         )
+#         self.tokenizer = AutoTokenizer.from_pretrained(
+#             "mistralai/Mistral-7B-v0.1", padding_side="left"
+#         )
+#         print("LLM Agent created.")
 
-    def _output_from_prompt(self, text: str):
-        model_inputs = self.tokenizer([text], return_tensors="pt").to("cuda")
-        generated_ids = self.model.generate(**model_inputs)
-        output = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        return output
+#     def _output_from_prompt(self, text: str):
+#         model_inputs = self.tokenizer([text], return_tensors="pt").to("cuda")
+#         generated_ids = self.model.generate(**model_inputs)
+#         output = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+#         return output
 
-    def process_voice_input(self, voice_input):
-        """
-        Taking a user voice input, returns a corresponding position.
-        """
-        raise NotImplementedError
+#     def process_voice_input(self, voice_input):
+#         """
+#         Taking a user voice input, returns a corresponding position.
+#         """
+#         raise NotImplementedError
 
 
 # !pip install -q -U  datasets  tensorflow  playwright html2text sentence_transformers faiss-cpu
 # !pip install -q  peft==0.4.0  trl==0.4.7
 # !playwright install
 # !playwright install-deps
+
+
+style = """
+Please answer in the style of Liberty Prime. Here are some examples of quotes from Liberty Prime to help you understand its style:
+    "Communism is the very definition of failure!"
+    "Communist engaged!"
+    "Communism is a temporary setback on the road to freedom."
+    "Communist target acquired."
+    "Communists detected on American soil. Lethal force engaged!"
+    "Democracy is non-negotiable."
+    "Freedom is the sovereign right of every American."
+    "Embrace democracy, or you will be eradicated."
+    "Democracy is truth. Communism is death."
+    "Democracy will never be defeated!"
+    "The last domino falls here!"
+    "Established stratagem: Inadequate."
+    "Tactical assessment: Red Soviet victory... impossible."
+    "Engaging red Soviet aggressors."
+    "We will not fear the red menace!"
+    "Commencing the eradiction of all Soviet communists!"
+    "Initiating directive 66: destroy all communists!"
+    "America will never fall to Communist invasion!"
+    "Death is a preferable alternative to Communism!"
+"""
+
+
+PROMPT_TEMPLATES = {
+    "standard_rag": """
+### [INST] Instruction: Answer the question based on your knowledge. If applicable, the provided context should help with the answer and should override your existing knowledge. Here is the provided context:
+
+{context}
+
+End of context.
+
+Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
+if you are asked "Who was the first Roman Emperor ?", you should not answer "The first Roman Emperor was
+Augustus", but instead directly answer "Augustus".
+
+### QUESTION:
+{question} [/INST]
+""",
+    "drone_loc": """ 
+
+### [INST] Instruction: Answer the question based on your knowledge. 
+
+For reference, here is a list of coordinates given in format "name \t x \t y \t z" where "name" is the name of the position, and "x", "y" and "z" are the corresponding coordinates in 3 axes.
+
+{context}
+
+End of context.
+
+Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
+if you are asked "Give me the coordinates of Alice's desk.", and the context contains "Alice's desk \t 10 \t 20 \t 30", you should not answer "Alice's desk it as coordinates (10,20,30)", but instead directly answer "(10,20,30)".
+
+### QUESTION:
+{question} [/INST]
+""",
+    # TODO : make a more suited prompt, like "here is a list of positions in format 'name \t x \t y \z' that you can use when building the trajectories, and keep The output should not be wrapped in a sentence, but rather given directly"
+}
 
 
 class RAG_LLMAgent:
@@ -74,6 +133,7 @@ class RAG_LLMAgent:
         bnb_4bit_compute_dtype="float16",  # Compute dtype for 4-bit base models
         bnb_4bit_quant_type="nf4",  # Quantization type (fp4 or nf4)
         use_nested_quant=False,  # Activate nested quantization for 4-bit base models (double quantization)
+        prompt_template_key="standard_rag",
     ):
         # Tokenizer
         # self.model_config = transformers.AutoConfig.from_pretrained(model_name)
@@ -111,26 +171,13 @@ class RAG_LLMAgent:
 
         self.retriever = None
 
+        self.prompt_template_key = prompt_template_key
+
     def __call__(self, question: str):
         mistral_llm = HuggingFacePipeline(pipeline=self.text_generation_pipeline)
 
         # Create prompt template from prompt template
-        prompt_template = """
-        ### [INST] Instruction: Answer the question based on your knowledge. If applicable, the provided context should help with the answer and should override your existing knowledge. Here is the provided context:
-
-        {context}
-
-        End of context.
-
-        Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
-        if you are asked "Who was the first Roman Emperor ?", you should not answer "The first Roman Emperor was
-        Augustus", but instead directly answer "Augustus".
-
-        ### QUESTION:
-        {question} [/INST]
-        """
-
-        # TODO : make a more suited prompt, like "here is a list of positions in format 'name \t x \t y \z' that you can use when building the trajectories, and keep The output should not be wrapped in a sentence, but rather given directly"
+        prompt_template = PROMPT_TEMPLATES[self.prompt_template_key]
 
         prompt = PromptTemplate(
             input_variables=["context", "question"],
@@ -177,7 +224,7 @@ class RAG_LLMAgent:
         if list_of_urls is not None:
             docs_transformed = self._retrieve_urls(list_of_urls)
         if text is not None:
-            docs_transformed = self._text_to_document(text)
+            docs_transformed = [self._text_to_document(text)]
         if (list_of_urls is None) and (text is None):
             raise ValueError("Need at least one of list_of_urls or text")
         if (list_of_urls is not None) and (text is not None):

@@ -56,4 +56,11 @@ class Pathfinder:
 
         # For now, it's not needed for the proof of concept. Just return the real vector.
 
+        """
+        # TODO : before implementing ORCA. Just stop if there is an obstacle at 1 m
+        obstacle = raytrace_blender(desired_path_vector, max_distance=1m)
+        if obstacle:
+            return Vector(0, 0, 0)
+        """
+
         return desired_path_vector

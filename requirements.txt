@@ -11,3 +11,4 @@ accelerate
 langchain
 bitsandbytes
 langchain-community
+sentence-transformers

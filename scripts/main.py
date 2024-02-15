@@ -24,7 +24,7 @@ from mathutils import Vector
 # Argparser
 parser = ArgumentParserForBlender()
 parser.add_argument("-sp", "--start_pos", type=str, required=True, help="")
-args = parser.parse_args
+args = parser.parse_args()
 
 
 # Before beginning, assert that we are inside a Blender environment, and that
@@ -45,9 +45,14 @@ drone_piloter = DronePiloter()
 
 
 # ------------------------ Command interpretation ---------------------------- #
-# TODO  integrate the LLM module to translate voice commands into a position
+# TODO  integrate the LLM module to translate input command into a position
+
+user_input = input("Please enter your instructions: ")
+
+# Continue the code after Enter is pressed
+print(f"You said : {user_input}. Your request will now be processed. DEMOCRATIC EXPANSIONISM IS BASED.")
 # target = LLMAgent(
-#     voice_input
+#     user_input
 # )
 # Default to pre-set for now
 navigator = bpy.object["Navigator"]
@@ -64,15 +69,20 @@ scene.octree.populate_self(navigator.position, target.postion, pathfinder)
 # the paths even if the starting position changes (that's the entire point of
 # the flowfield).
 
+destination_cell = scene.octree.get_closest_cell_to_position(target.position)
+
 # ------------------------------ Piloting ------------------------------------ #
 stop = False
+start_time = time.time()
 while not stop:
     # The main pathfiding relies on the scene cartography obtained by photogrammetry.
     # We use it to get a velocity vector towards next waypoint. Then, we combine
     # it with a local avoidance which corrects this vector to ensure we don't
     # bump into anything.
     """
-    The info for local avoidance is given only by DPT, I think ; I don't think we need to update the scene represetnation by adding obstacls unless they are massive, new, and immobile, otherwise
+    The info for local avoidance is given only by DPT, I think ; I don't think
+    we need to update the scene represetnation by adding obstacls unless they
+    are massive, new, and immobile, otherwise
     """
 
     # My pathing_vector is the vector (in the flowfield) of the cell I am
@@ -88,5 +98,27 @@ while not stop:
     )
 
     # Finally, instruct the drone piloter to move at this velocity
-    drone_piloter.send_instructions(final_vector_velocity)
-    time.sleep(0.1)
+    # We maintain the instruction for one entire second (TODO reduce this likely)
+    COMMAND_MAINTAIN_TIME = 1
+    SPEED = 50
+    piloting_start_time = time.time()
+    while order_time <= piloting_start_time + COMMAND_MAINTAIN_TIME:
+        order_time = time.time()
+        dx, dy, dz = drone_piloter.send_instructions(final_vector_velocity, speed=SPEED)
+
+    # Update our estimated position based on our speed
+    # Recall that the speed was given in cm/s in the vector (as per DJiTelloPy's doc), and
+    # that we update commands every second, so we just dicide by 100
+    drone_piloter.update_position(dx=dx / 100, dy=dy / 100, dz=dz / 100)
+
+    # If we have arrived at our destination, stop
+    current_closest_cell = scene.octree.get_closest_cell_to_position(
+        drone_piloter.position
+    )
+    if current_closest_cell == destination_cell:
+        stop = True
+
+    # If we have timed out, stop
+    TIMEOUT = 60
+    if time.time() > start_time + TIMEOUT:
+        stop = True

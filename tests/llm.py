@@ -1,18 +1,20 @@
 import sys
 
-sys.path.append("..")
+sys.path.append("..")  # If called from tests directory
+sys.path.append(".")  # If called from main directory
 
-from autodrone.llm import SimpleLLMAgent, RAG_LLMAgent
-
-
-# myagent = SimpleLLMAgent()
-# result = myagent._output_from_prompt("The quick brown fox jumped")
-# print(result)
+from autodrone.llm import RAG_LLMAgent
 
 
-# A more practical test
-my_rag_agent = RAG_LLMAgent()
-result2 = my_rag_agent(
-    context="Augustus is our beloved emperor.", question="Who is our beloved emperor?"
+my_rag_agent = RAG_LLMAgent(
+    model_name="microsoft/phi-2",  # Try a smaller model, TODO make it default if it works well
 )
-print(result2)
+
+# Set context
+my_rag_agent._create_retriever(text="Augustus is our beloved emperor.")
+
+result = my_rag_agent(
+    question="Who is our beloved emperor?",
+)
+print(result)
+assert result == "Augustus."

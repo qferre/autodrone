@@ -3,6 +3,7 @@ import djitellopy as dtp
 
 from autodrone.base.mathutils import euclidian_distance, vector_to_euler
 
+
 class DronePiloter:
     """
     Class responsible for translating directions (given as a velocity vector)
@@ -36,7 +37,12 @@ class DronePiloter:
 
         return position, rotation_euler
 
-    def send_instructions(self, desired_velocity, speed=60):
+    def update_position(self, dx, dy, dz):
+        self.position.x += dx
+        self.position.y += dy
+        self.position.z += dz
+
+    def send_instructions(self, desired_velocity, speed=60, debug_mode=False):
         normalized_desired_orientation = normalize(desired_velocity)
 
         # First orient towards the velocity vector (only for yaw)
@@ -55,8 +61,20 @@ class DronePiloter:
 
         projected_on_xy_plane = project_on_xy_plane(desired_velocity)
 
-        self.drone.send_rc_control(
-            left_right_velocity=0,
-            forward_back_velocity=euclidian_distance(projected_on_xy_plane) * speed,
-            up_down_velocity=normalized_desired_orientation.y * speed,
-        )
+        if not debug_mode:
+            self.drone.send_rc_control(
+                left_right_velocity=0,
+                forward_back_velocity=euclidian_distance(projected_on_xy_plane) * speed,
+                up_down_velocity=normalized_desired_orientation.z * speed,
+            )
+
+        dx = projected_on_xy_plane.x * speed
+        dy = projected_on_xy_plane.y * speed
+        dz = normalized_desired_orientation.z * speed
+
+        print(f"MOVEMENT ORDER GIVEN FOR dx {dx} dy {dy} dz {dz}")
+
+        # return the expected delta in centimeters per second
+        return dx, dy, dz
+
+        # DEBUG : FOR NOW, SIMPLY PRINT THE COMMAND BEING GIVEN INSTEAD OF SENDING IT
