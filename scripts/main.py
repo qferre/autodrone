@@ -26,6 +26,8 @@ parser = ArgumentParserForBlender()
 parser.add_argument("-sp", "--start_pos", type=str, required=True, help="")
 args = parser.parse_args()
 
+start_position = args["start_pos"]
+
 
 # Before beginning, assert that we are inside a Blender environment, and that
 # there is a mesh representing the real environment available.
@@ -41,7 +43,7 @@ scene = SpaceRepresentation()
 
 # Initialize modules
 pathfinder = Pathfinder()
-drone_piloter = DronePiloter()
+drone_piloter = DronePiloter(starting_position = start_position)
 
 
 # ------------------------ Command interpretation ---------------------------- #
@@ -50,7 +52,7 @@ drone_piloter = DronePiloter()
 user_input = input("Please enter your instructions: ")
 
 # Continue the code after Enter is pressed
-print(f"You said : {user_input}. Your request will now be processed. DEMOCRATIC EXPANSIONISM IS BASED.")
+print(f"You said : {user_input}. Your request will now be processed.")
 # target = LLMAgent(
 #     user_input
 # )
@@ -99,6 +101,7 @@ while not stop:
 
     # Finally, instruct the drone piloter to move at this velocity
     # We maintain the instruction for one entire second (TODO reduce this likely)
+    # Each step, we get the estimated dx dy dz in cm/s
     COMMAND_MAINTAIN_TIME = 1
     SPEED = 50
     piloting_start_time = time.time()
@@ -108,7 +111,7 @@ while not stop:
 
     # Update our estimated position based on our speed
     # Recall that the speed was given in cm/s in the vector (as per DJiTelloPy's doc), and
-    # that we update commands every second, so we just dicide by 100
+    # that we update the position every second, so we just divide by 100
     drone_piloter.update_position(dx=dx / 100, dy=dy / 100, dz=dz / 100)
 
     # If we have arrived at our destination, stop

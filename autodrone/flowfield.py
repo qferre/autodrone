@@ -92,7 +92,8 @@ class OctreeVectorNode(OctreeNode):
                 result, location, normal, face_index = cube.ray_cast(
                     ray_origin,
                     normal,
-                    distance=self.size,  # Don't care if we hit something outside of the cell
+                    distance=self.size
+                    - 1e-2,  # Don't care if we hit something outside of the cell. Substract an epsilon to prevent hitting ourselves though
                 )
 
                 if result:
@@ -115,8 +116,8 @@ class FlowField(Octree):
         self,
         endpos,
         pathfinder: Pathfinder,
-        dist_threshold_graph_conversion=120,
-        top_k_neighbors_graph_conversion=20,
+        dist_threshold_graph_conversion=1000,
+        top_k_neighbors_graph_conversion=8,
     ):
 
         # Turn the octree into a graph once and for all

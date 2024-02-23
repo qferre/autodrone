@@ -3,6 +3,8 @@ import djitellopy as dtp
 
 from autodrone.base.mathutils import euclidian_distance, vector_to_euler
 
+from mathutils import Vector
+
 
 class DronePiloter:
     """
@@ -10,18 +12,22 @@ class DronePiloter:
     into actual instructions for the drone.
 
     Use the Tello drone for a proof of concept : https://github.com/damiafuentes/DJITelloPy
+    The Tello must be on the same WiFi as the computer running this code !
 
     See https://github.com/damiafuentes/DJITelloPy/blob/master/examples/manual-control-pygame.py for source example
     """
 
-    def __init__(self):
+    def __init__(self, starting_position: Vector = None):
         # Connect to the Tello
         self.drone = dtp.Tello()
         self.drone.connect()
 
         # What are my position and rotation ?
         # TODO Find a way to deduce those, or set them at startup.
-        self.position, self.rotation_euler = self.infer_position()
+        if starting_position is None:
+            (self.position,) = self.infer_position()
+        else:
+            self.position = starting_position
 
     def takeoff(self):
         self.drone.takeoff()
@@ -32,10 +38,6 @@ class DronePiloter:
     def infer_position(self):
         # TODO : use cross-view matching to deduce my potential position, or simply use the GNSS chip.
         raise NotImplementedError
-        position = Vector()
-        rotation_euler = Vector()
-
-        return position, rotation_euler
 
     def update_position(self, dx, dy, dz):
         self.position.x += dx
@@ -43,6 +45,18 @@ class DronePiloter:
         self.position.z += dz
 
     def send_instructions(self, desired_velocity, speed=60, debug_mode=False):
+        """_summary_
+
+        Args:
+            desired_velocity (_type_): _description_
+            speed (int, optional): _description_. Defaults to 60.
+            debug_mode (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+
+            dx, dy, dz : expected delta in centimeters per second
+        """
         normalized_desired_orientation = normalize(desired_velocity)
 
         # First orient towards the velocity vector (only for yaw)
@@ -61,6 +75,7 @@ class DronePiloter:
 
         projected_on_xy_plane = project_on_xy_plane(desired_velocity)
 
+        # DEBUG : FOR NOW, SIMPLY PRINT THE COMMAND BEING GIVEN INSTEAD OF SENDING IT
         if not debug_mode:
             self.drone.send_rc_control(
                 left_right_velocity=0,
@@ -76,5 +91,3 @@ class DronePiloter:
 
         # return the expected delta in centimeters per second
         return dx, dy, dz
-
-        # DEBUG : FOR NOW, SIMPLY PRINT THE COMMAND BEING GIVEN INSTEAD OF SENDING IT

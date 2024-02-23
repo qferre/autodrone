@@ -30,36 +30,6 @@ from typing import List
 from pydantic import BaseModel, PrivateAttr, computed_field
 
 
-# class SimpleLLMAgent:
-#     """
-#     Simple LLMAgent using HuggingFace-style code.
-#     """
-
-#     def __init__(self):
-#         print("Creating LLM Agent...")
-#         self.model = AutoModelForCausalLM.from_pretrained(
-#             "mistralai/Mistral-7B-v0.1",
-#             device_map="auto",
-#             # load_in_4bit=True
-#         )
-#         self.tokenizer = AutoTokenizer.from_pretrained(
-#             "mistralai/Mistral-7B-v0.1", padding_side="left"
-#         )
-#         print("LLM Agent created.")
-
-#     def _output_from_prompt(self, text: str):
-#         model_inputs = self.tokenizer([text], return_tensors="pt").to("cuda")
-#         generated_ids = self.model.generate(**model_inputs)
-#         output = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-#         return output
-
-#     def process_voice_input(self, voice_input):
-#         """
-#         Taking a user voice input, returns a corresponding position.
-#         """
-#         raise NotImplementedError
-
-
 # !pip install -q -U  datasets  tensorflow  playwright html2text sentence_transformers faiss-cpu
 # !pip install -q  peft==0.4.0  trl==0.4.7
 # !playwright install
@@ -87,41 +57,41 @@ Please answer in the style of Liberty Prime. Here are some examples of quotes fr
     "Initiating directive 66: destroy all communists!"
     "America will never fall to Communist invasion!"
     "Death is a preferable alternative to Communism!"
+    "Democratic expansionism is based!"
 """
 
 
 PROMPT_TEMPLATES = {
     "standard_rag": """
-### [INST] Instruction: Answer the question based on your knowledge. If applicable, the provided context should help with the answer and should override your existing knowledge. Here is the provided context:
+        ### [INST] Instruction: Answer the question based on your knowledge. If applicable, the provided context should help with the answer and should override your existing knowledge. Here is the provided context:
 
-{context}
+        {context}
 
-End of context.
+        End of context.
 
-Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
-if you are asked "Who was the first Roman Emperor ?", you should not answer "The first Roman Emperor was
-Augustus", but instead directly answer "Augustus".
+        Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
+        if you are asked "Who was the first Roman Emperor ?", you should not answer "The first Roman Emperor was
+        Augustus", but instead directly answer "Augustus".
 
-### QUESTION:
-{question} [/INST]
-""",
-    "drone_loc": """ 
+        ### QUESTION:
+        {question} [/INST]
+        """,
+    "drone_loc": """
 
-### [INST] Instruction: Answer the question based on your knowledge. 
+        ### [INST] Instruction: Answer the question based on your knowledge.
 
-For reference, here is a list of coordinates given in format "name \t x \t y \t z" where "name" is the name of the position, and "x", "y" and "z" are the corresponding coordinates in 3 axes.
+        For reference, here is a list of coordinates given in format "name \t x \t y \t z" where "name" is the name of the position, and "x", "y" and "z" are the corresponding coordinates in 3 axes.
 
-{context}
+        {context}
 
-End of context.
+        End of context.
 
-Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
-if you are asked "Give me the coordinates of Alice's desk.", and the context contains "Alice's desk \t 10 \t 20 \t 30", you should not answer "Alice's desk it as coordinates (10,20,30)", but instead directly answer "(10,20,30)".
+        Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
+        if you are asked "Give me the coordinates of Alice's desk.", and the context contains "Alice's desk \t 10 \t 20 \t 30", you should not answer "Alice's desk it as coordinates (10,20,30)", but instead directly answer "(10,20,30)".
 
-### QUESTION:
-{question} [/INST]
-""",
-    # TODO : make a more suited prompt, like "here is a list of positions in format 'name \t x \t y \z' that you can use when building the trajectories, and keep The output should not be wrapped in a sentence, but rather given directly"
+        ### QUESTION:
+        {question} [/INST]
+        """,
 }
 
 
@@ -145,16 +115,16 @@ class RAG_LLMAgent:
 
         # Set up quantization config
         compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
-        # bnb_config = BitsAndBytesConfig(
-        #     load_in_4bit=use_4bit,
-        #     bnb_4bit_quant_type=bnb_4bit_quant_type,
-        #     bnb_4bit_compute_dtype=compute_dtype,
-        #     bnb_4bit_use_double_quant=use_nested_quant,
-        # )
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=use_4bit,
+            bnb_4bit_quant_type=bnb_4bit_quant_type,
+            bnb_4bit_compute_dtype=compute_dtype,
+            bnb_4bit_use_double_quant=use_nested_quant,
+        )
 
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            # quantization_config=bnb_config,
+            quantization_config=bnb_config,
         )
 
         nest_asyncio.apply()
@@ -192,7 +162,6 @@ class RAG_LLMAgent:
             "question": RunnablePassthrough(),
         } | llm_chain
 
-        # rag_chain.invoke("Should I start Gibbs next week for fantasy?")
         result = rag_chain.invoke(question)
         return result
 
