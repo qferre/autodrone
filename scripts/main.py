@@ -107,12 +107,12 @@ while not stop:
     piloting_start_time = time.time()
     while order_time <= piloting_start_time + COMMAND_MAINTAIN_TIME:
         order_time = time.time()
-        dx, dy, dz = drone_piloter.send_instructions(final_vector_velocity, speed=SPEED)
+        dx, dy, dz, rotation = drone_piloter.send_instructions(final_vector_velocity, speed=SPEED)
 
     # Update our estimated position based on our speed
     # Recall that the speed was given in cm/s in the vector (as per DJiTelloPy's doc), and
     # that we update the position every second, so we just divide by 100
-    drone_piloter.update_position(dx=dx / 100, dy=dy / 100, dz=dz / 100)
+    drone_piloter.update_position(dx=dx / 100, dy=dy / 100, dz=dz / 100, rotation=rotation)
 
     # If we have arrived at our destination, stop
     current_closest_cell = scene.octree.get_closest_cell_to_position(

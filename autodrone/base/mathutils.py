@@ -17,6 +17,19 @@ def vector_to_euler(vector: Vector):
     return vector.to_track_quat("-Z").to_euler()
 
 
+def project_on_plane(vector : Vector, normal: Vector):
+    """Project the vector on the plan defined by the normal.
+
+    Args:
+        vector (Vector): _description_
+        normal (Vector): _description_
+    """
+    dot_product = np.dot(normal, vector)
+    sub_vector = Vector(dot_product * normal)
+    projected_vector = vector - sub_vector
+    return projected_vector
+
+
 def blender_create_cube(center, edge_size, name="Cube"):
     center = Vector(center)
 

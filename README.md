@@ -29,7 +29,13 @@ With one of the scripts in the /scripts directory. Of course, replace scene.blen
 & python tests/octree.py
 & python tests/pathfinder.py
 & "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe" scenes/basic.blend --python tests/space_representation.py
+& "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe" scenes/basic.blend --background --python tests/pilot.py
+
+& "C:\Program Files (x86)\Steam\steamapps\common\Blender\4.0\python\bin\python.exe" -m pip install -r requirements.txt
+
 blender scenes/basic.blend --background --python tests/space_representation.py
+
+
 
 
 
