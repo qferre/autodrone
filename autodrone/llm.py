@@ -81,12 +81,13 @@ PROMPT_TEMPLATES = {
         ### [INST] Instruction: Answer the question based on your knowledge.
 
         For reference, here is a list of coordinates given in format "name \t x \t y \t z" where "name" is the name of the position, and "x", "y" and "z" are the corresponding coordinates in 3 axes.
+        Ignore any lines starting with '#' as these are comment lines.
 
         {context}
 
         End of context.
 
-        Output format : The output should not be wrapped in a sentence, but rather given directly. For example,
+        Output format: the output should not be wrapped in a sentence, but rather given directly. For example,
         if you are asked "Give me the coordinates of Alice's desk.", and the context contains "Alice's desk \t 10 \t 20 \t 30", you should not answer "Alice's desk it as coordinates (10,20,30)", but instead directly answer "(10,20,30)".
 
         ### QUESTION:
@@ -189,7 +190,18 @@ class RAG_LLMAgent:
     def _text_to_document(text: str):
         return Document(page_content=text)
 
-    def _create_retriever(self, list_of_urls=None, text=None):
+    def setup_retriever_for_this_context(self, list_of_urls=None, text=None):
+        """Setup the retriever of the model so that the context is what is given 
+        in the URL of the text.
+
+        Args:
+            list_of_urls (_type_, optional): _description_. Defaults to None.
+            text (_type_, optional): _description_. Defaults to None.
+
+        Raises:
+            ValueError: _description_
+            ValueError: _description_
+        """
         if list_of_urls is not None:
             docs_transformed = self._retrieve_urls(list_of_urls)
         if text is not None:
