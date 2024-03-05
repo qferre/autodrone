@@ -24,16 +24,19 @@ With one of the scripts in the /scripts directory. Of course, replace scene.blen
 
 
 
-
+Move the commands below to the Makefile
 
 & python tests/octree.py
 & python tests/pathfinder.py
 & "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe" scenes/basic.blend --python tests/space_representation.py
 & "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe" scenes/basic.blend --background --python tests/pilot.py
+& "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe" scenes/basic.blend --background --python scripts/main.py -- --start_pos 0,0,2
 
 & "C:\Program Files (x86)\Steam\steamapps\common\Blender\4.0\python\bin\python.exe" -m pip install -r requirements.txt --upgrade --force-reinstall
 
 blender scenes/basic.blend --background --python tests/space_representation.py
+
+
 
 
 

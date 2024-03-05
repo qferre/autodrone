@@ -4,17 +4,23 @@ TODO : blender interpreter by default has its workdir in the home dir when run f
 """
 
 import sys
+
+
+sys.path.append(".")  # necessary to import script from the blender python interpreter
+sys.path.append("..")
+
+
 from pathlib import Path
 import time
 from autodrone.utils import ArgumentParserForBlender
 
-sys.path.append(".")  # necessary to import script from the blender python interpreter
 
 from autodrone.space import SpaceRepresentation
-from autodrone.pathfind import DronePiloter, Pathfinder
+from autodrone.pilot import DronePiloter
+from autodrone.pathfind import Pathfinder
 
 # from autodrone.main import update
-from autodrone.llm import LLMAgent
+from autodrone.llm import RAG_LLMAgent
 
 # Blender modules
 import bpy
@@ -26,7 +32,8 @@ parser = ArgumentParserForBlender()
 parser.add_argument("-sp", "--start_pos", type=str, required=True, help="")
 args = parser.parse_args()
 
-start_position = Vector(",".split(args["start_pos"]))
+
+start_position = Vector((float(i) for i in args.start_pos.split(",")))
 print(f"Start position: {start_position}")
 
 
@@ -42,10 +49,6 @@ print(f"Start position: {start_position}")
 scene = SpaceRepresentation()
 # NOTE If the scene changes (new obstacles, ...) the SpaceRepresentation must
 # be updated.
-
-# Initialize modules
-pathfinder = Pathfinder()
-drone_piloter = DronePiloter(starting_position=start_position)
 
 
 # ------------------------ Command interpretation ---------------------------- #
@@ -71,6 +74,11 @@ target = bpy.objects["Target"]
 # The path of the index should be an argument of the command line
 
 # ----------------------------- Pathfinding ---------------------------------- #
+
+# Initialize modules
+pathfinder = Pathfinder()
+drone_piloter = DronePiloter(starting_position=start_position)
+
 # Now that we have the targets, compute the paths and populate the flowfield.
 scene.octree.populate_self(navigator.position, target.position, pathfinder)
 # In theory, as long as the target does not change, we do not need to recompute
