@@ -29,12 +29,6 @@ new_position = piloter_entity.position
 new_rotation = piloter_entity.rotation_euler
 
 print(f"New position {new_position}, new rotation {new_rotation}")
-assert new_position == Vector(
-    (
-        start_position.x + dx / 100,
-        start_position.y + dy / 100,
-        start_position.z + dz / 100,
-    )
-)
 
-assert new_rotation == (0, 0, 0 + rotation)
+assert new_position == Vector((5.0, 4.0, 6.0))
+assert new_rotation == Vector((0.0, 0.0, 0.0 + rotation))

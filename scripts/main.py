@@ -26,7 +26,8 @@ parser = ArgumentParserForBlender()
 parser.add_argument("-sp", "--start_pos", type=str, required=True, help="")
 args = parser.parse_args()
 
-start_position = args["start_pos"]
+start_position = Vector(",".split(args["start_pos"]))
+print(f"Start position: {start_position}")
 
 
 # Before beginning, assert that we are inside a Blender environment, and that
@@ -36,26 +37,31 @@ start_position = args["start_pos"]
 
 # ------------------- Initialize modules and representation ------------------ #
 
-# Create a SpaceRepresentaiton based on the currently open Blender file (the file with which the script was called)
+# Create a SpaceRepresentation based on the currently open Blender file (the
+# file with which the script was called).
 scene = SpaceRepresentation()
 # NOTE If the scene changes (new obstacles, ...) the SpaceRepresentation must
 # be updated.
 
 # Initialize modules
 pathfinder = Pathfinder()
-drone_piloter = DronePiloter(starting_position = start_position)
+drone_piloter = DronePiloter(starting_position=start_position)
 
 
 # ------------------------ Command interpretation ---------------------------- #
 # TODO  integrate the LLM module to translate input command into a position
 
-user_input = input("Please enter your instructions: ")
 
+llm_rag_agent = RAG_LLMAgent(
+    model_name="mistralai/Mistral-7B-Instruct-v0.2", prompt_template_key="drone_loc"
+)
+llm_rag_agent.setup_retriever_for_this_context(text=index)
+
+user_input = input("Please enter your instructions: ")
 # Continue the code after Enter is pressed
-print(f"You said : {user_input}. Your request will now be processed.")
-# target = LLMAgent(
-#     user_input
-# )
+print(f"You said: {user_input}. Your request will now be processed.")
+
+# target = llm_rag_agent(question=user_input)
 # Default to pre-set for now
 navigator = bpy.object["Navigator"]
 target = bpy.objects["Target"]
@@ -66,7 +72,7 @@ target = bpy.objects["Target"]
 
 # ----------------------------- Pathfinding ---------------------------------- #
 # Now that we have the targets, compute the paths and populate the flowfield.
-scene.octree.populate_self(navigator.position, target.postion, pathfinder)
+scene.octree.populate_self(navigator.position, target.position, pathfinder)
 # In theory, as long as the target does not change, we do not need to recompute
 # the paths even if the starting position changes (that's the entire point of
 # the flowfield).
@@ -76,6 +82,9 @@ destination_cell = scene.octree.get_closest_cell_to_position(target.position)
 # ------------------------------ Piloting ------------------------------------ #
 stop = False
 start_time = time.time()
+
+drone_piloter.takeoff()
+
 while not stop:
     # The main pathfiding relies on the scene cartography obtained by photogrammetry.
     # We use it to get a velocity vector towards next waypoint. Then, we combine
@@ -100,19 +109,27 @@ while not stop:
     )
 
     # Finally, instruct the drone piloter to move at this velocity
-    # We maintain the instruction for one entire second (TODO reduce this likely)
+    # We maintain the instruction for one entire second
     # Each step, we get the estimated dx dy dz in cm/s
     COMMAND_MAINTAIN_TIME = 1
     SPEED = 100
     piloting_start_time = time.time()
+
     while order_time <= piloting_start_time + COMMAND_MAINTAIN_TIME:
         order_time = time.time()
-        dx, dy, dz, rotation = drone_piloter.send_instructions(final_vector_velocity, speed=SPEED)
+        dx, dy, dz, step_rotation = drone_piloter.send_instructions(
+            final_vector_velocity, speed=SPEED
+        )
+        if step_rotation != 0:
+            rotation = step_rotation  # Rotation will only be applied once, so memorize the highest applied
 
     # Update our estimated position based on our speed
     # Recall that the speed was given in cm/s in the vector (as per DJiTelloPy's doc), and
     # that we update the position every second, so we just divide by 100
-    drone_piloter.update_position(dx=dx / 100, dy=dy / 100, dz=dz / 100, rotation=rotation)
+    drone_piloter.update_position(
+        dx=dx / 100, dy=dy / 100, dz=dz / 100, rotation=rotation
+    )
+    dx, dy, dz, rotation = 0  # Reset
 
     # If we have arrived at our destination, stop
     current_closest_cell = scene.octree.get_closest_cell_to_position(
@@ -125,3 +142,5 @@ while not stop:
     TIMEOUT = 60
     if time.time() > start_time + TIMEOUT:
         stop = True
+
+drone_piloter.land()

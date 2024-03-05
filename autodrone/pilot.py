@@ -21,7 +21,7 @@ class DronePiloter:
     See https://github.com/damiafuentes/DJITelloPy/blob/master/examples/manual-control-pygame.py for source example
     """
 
-    def __init__(self, starting_position: Vector = None, debug_mode=False):
+    def __init__(self, starting_position: Vector, debug_mode=False):
         """_summary_
 
         Args:
@@ -30,32 +30,23 @@ class DronePiloter:
         """
         self.debug_mode = debug_mode
 
+        # Connect to the Tello if not in debug mode
         if not self.debug_mode:
-            # Connect to the Tello if not in debug mode
             self.drone = dtp.Tello()
             self.drone.connect()
-
             print("Connected to Drone")
         else:
             print("DEBUG MODE WITHOUT DRONE")
 
-        # What are my position and rotation ?
-        # TODO Find a way to deduce those, or set them at startup.
-        if starting_position is None:
-            self.position = self.infer_position()
-        else:
-            self.position = starting_position
-        self.rotation_euler = Vector((0, 0, 0))  # Assume we start on the plane
+        # What are my starting position and rotation ?
+        self.position = starting_position
+        self.rotation_euler = Vector((0, 0, 0))  # Assume we start flat on the plane
 
     def takeoff(self):
         self.drone.takeoff()
 
     def land(self):
         self.drone.land()
-
-    def infer_position(self):
-        # TODO : use cross-view matching to deduce my potential position, or simply use the GNSS chip.
-        raise NotImplementedError
 
     def update_position(self, dx, dy, dz, rotation):
         self.position.x += dx
@@ -94,14 +85,11 @@ class DronePiloter:
         # We will almost never use roll (left-right velocity) manually, nor
         # yaw (we already rotated in the previous step).
 
-        # Project on xy plane
-        # TODO Do i really need that if I already have x,y,z components ?
         projected_on_xy_plane = project_on_plane(
             desired_velocity,
             normal=Vector((0, 0, 1)),
         )
 
-        # DEBUG : FOR NOW, SIMPLY PRINT THE COMMAND BEING GIVEN INSTEAD OF SENDING IT
         if not self.debug_mode:
             self.drone.send_rc_control(
                 left_right_velocity=0,
@@ -110,8 +98,8 @@ class DronePiloter:
                 yaw_velocity=0,
             )
 
-        dx = projected_on_xy_plane.x * speed
-        dy = projected_on_xy_plane.y * speed
+        dx = desired_velocity.x * speed
+        dy = desired_velocity.y * speed
         dz = desired_velocity.z * speed
 
         print(f"MOVEMENT ORDER GIVEN FOR: dx {dx} dy {dy} dz {dz} rotation {rotation}")
