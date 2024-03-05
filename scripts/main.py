@@ -103,7 +103,7 @@ while not stop:
     # We maintain the instruction for one entire second (TODO reduce this likely)
     # Each step, we get the estimated dx dy dz in cm/s
     COMMAND_MAINTAIN_TIME = 1
-    SPEED = 50
+    SPEED = 100
     piloting_start_time = time.time()
     while order_time <= piloting_start_time + COMMAND_MAINTAIN_TIME:
         order_time = time.time()
