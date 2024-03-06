@@ -43,10 +43,12 @@ class DronePiloter:
         self.rotation_euler = Vector((0, 0, 0))  # Assume we start flat on the plane
 
     def takeoff(self):
-        self.drone.takeoff()
+        if not self.debug_mode:
+            self.drone.takeoff()
 
     def land(self):
-        self.drone.land()
+        if not self.debug_mode:
+            self.drone.land()
 
     def update_position(self, dx, dy, dz, rotation):
         self.position.x += dx

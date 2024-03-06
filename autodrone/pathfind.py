@@ -46,7 +46,7 @@ class Pathfinder:
 
         return path
 
-    def local_avoidance_behavior(desired_path_vector, scene):
+    def local_avoidance_behavior(self, desired_path_vector):
         # Based on http://gamma.cs.unc.edu/ORCA/publications/ORCA.pdf
 
         # Calculate all velocities that would cause the agent to collide with an obstacle (probably a function inside SpaceRepresentation)
