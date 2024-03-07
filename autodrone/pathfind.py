@@ -9,6 +9,18 @@ class Pathfinder:
         startpos,
         endpos,
     ):
+        """Tries to find a path in the given scene between startpos and endpos.
+        Uses the A-star algorithm.
+
+        Args:
+            scene_octree (_type_): _description_
+            scene_graph (_type_): _description_
+            startpos (_type_): _description_
+            endpos (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         path = []
         start_cell = scene_octree.get_closest_cell_to_position(startpos)
         assert (
@@ -47,14 +59,6 @@ class Pathfinder:
         return path
 
     def local_avoidance_behavior(self, desired_path_vector):
-        # Based on http://gamma.cs.unc.edu/ORCA/publications/ORCA.pdf
-
-        # Calculate all velocities that would cause the agent to collide with an obstacle (probably a function inside SpaceRepresentation)
-        # Then use gradient descent to find the highest velocity (closest to pathing vector) that does not conflict
-
-        # TODO : may require adaptation for drones since ORCA is not designed for actors with lots of inertia
-
-        # For now, it's not needed for the proof of concept. Just return the real vector.
 
         """
         # TODO : before implementing ORCA or depth estimation. Just stop if there is an obstacle at 1 m

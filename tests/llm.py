@@ -1,7 +1,5 @@
 import sys
-
-sys.path.append("..")  # If called from tests directory
-sys.path.append(".")  # If called from main directory
+sys.path.append(".")
 
 from autodrone.llm import RAG_LLMAgent
 

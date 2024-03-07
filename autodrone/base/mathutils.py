@@ -2,17 +2,20 @@ import numpy as np
 from mathutils import Vector
 import bpy
 
-
-def project_on_xy_plane():
-    raise NotImplementedError
-
-
 def euclidian_distance(a: tuple, b: tuple):
     d = np.array(a) - np.array(b)
     return np.sum(d**2)
 
 
 def vector_to_euler(vector: Vector):
+    """_summary_
+
+    Args:
+        vector (Vector): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # Blender's default orientation is -Z
     return vector.to_track_quat("-Z").to_euler()
 
@@ -31,6 +34,16 @@ def project_on_plane(vector : Vector, normal: Vector):
 
 
 def blender_create_cube(center, edge_size, name="Cube"):
+    """_summary_
+
+    Args:
+        center (_type_): _description_
+        edge_size (_type_): _description_
+        name (str, optional): _description_. Defaults to "Cube".
+
+    Returns:
+        _type_: _description_
+    """
     center = Vector(center)
 
     mesh = bpy.data.meshes.new(name)
@@ -68,6 +81,16 @@ def blender_create_cube(center, edge_size, name="Cube"):
 
 
 def blender_raycast(origin, target, max_distance=None):
+    """_summary_
+
+    Args:
+        origin (_type_): _description_
+        target (_type_): _description_
+        max_distance (_type_, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
 
     scene = bpy.context.scene
     direction = target - origin

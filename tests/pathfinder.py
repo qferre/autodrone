@@ -1,6 +1,5 @@
 import sys
-
-sys.path.append("..")
+sys.path.append(".")
 
 from autodrone.base.octree import OctreeNode, Octree
 from autodrone.pathfind import Pathfinder

@@ -1,10 +1,4 @@
-"""
-This test must be run in the Blender interpret, using the scenes/basic.blend scene.
-The Makefile will take care of it.
-"""
-
 import sys
-
 sys.path.append(".")
 
 from autodrone.space import SpaceRepresentation

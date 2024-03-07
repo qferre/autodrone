@@ -191,7 +191,7 @@ class RAG_LLMAgent:
         return Document(page_content=text)
 
     def setup_retriever_for_this_context(self, list_of_urls=None, text=None):
-        """Setup the retriever of the model so that the context is what is given 
+        """Setup the retriever of the model so that the context is what is given
         in the URL of the text.
 
         Args:

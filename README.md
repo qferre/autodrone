@@ -70,6 +70,11 @@ Finally, a Piloter module will control the drone as it moves through the cells.
 
 
 
+## Miscellaneous
+
+Run tests through the makefile since they necesitate a Blender scene, just call `make tests`
+
+
 
 # Credits
 

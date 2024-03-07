@@ -1,7 +1,5 @@
 import sys
-
-sys.path.append("..")  # If called from tests directory
-sys.path.append(".")  # If called from main directory
+sys.path.append(".")
 
 from autodrone.base.octree import OctreeNode, Octree
 from mathutils import Vector
@@ -9,7 +7,6 @@ from mathutils import Vector
 # Test subdivision
 x = OctreeNode(id=1, center=Vector((0, 0, 0)), size=10)
 x.subdivide()
-
 
 assert set([tuple(n.center) for n in x.children]) == set(
     [

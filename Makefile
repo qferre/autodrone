@@ -3,8 +3,9 @@ blender_install_dependencies:
 	# TODO REWRITE THIS USING BLENDER PATH AND THE PIP OF BLENDER
 
 tests:
-	# Tests may necessitate a Blender file to operate on
-	# for test file in test directory :
-	# blender scenes/scene.blend --background --python $test
+	directory="/tests"
+	for file in "$directory"/*; do
+		blender scenes/scene.blend --background --python "$file"
+	done
 
 
