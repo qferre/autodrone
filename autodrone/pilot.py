@@ -76,8 +76,13 @@ class DronePiloter:
             normalized_desired_orientation  # , origin=(0, 0, -1)
         ).z
 
-        rotation = self.rotation_euler.z - desired_orientation
+        rotation = desired_orientation - self.rotation_euler.z
+        print(
+            f"DEBUG self.rotation_euler.z {self.rotation_euler.z}, normalized_desired_orientation {normalized_desired_orientation}, desired_orientation {desired_orientation} --> rotation {rotation}"
+        )
+
         if not self.debug_mode:
+            # TODO BUG UNITS ARE NOT THE SAME, rotation is in radian and the drone function expects it in centidegrees
             if rotation > 0:
                 self.drone.rotate_counter_clockwise(rotation)
             else:

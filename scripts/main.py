@@ -137,27 +137,27 @@ while not stop:
     SPEED = 100
     piloting_start_time = order_time = time.time()
 
-    while order_time <= piloting_start_time + COMMAND_MAINTAIN_TIME:
-        order_time = time.time()
-        dx, dy, dz, step_rotation = drone_piloter.send_instructions(
-            final_vector_velocity, speed=SPEED
-        )
-        if step_rotation != 0:
-            rotation = step_rotation  # Rotation will only be applied once, so memorize the highest applied
-        time.sleep(0.25)
+    order_time = time.time()
+    dx, dy, dz, rotation = drone_piloter.send_instructions(
+        final_vector_velocity, speed=SPEED
+    )
+    time.sleep(
+        COMMAND_MAINTAIN_TIME
+    )  # Maintain the current command for COMMAND_MAINTAIN_TIME
 
-        # TODO : SINCE POSITION IS NOT UPDATED, ROTATION WILL BE APPLIED  SEVERAL TIMES SINCE THE CODE DOES NOT KNOW THE DRONE HAS
-        # ALREADY ROTATED :)
-
-    print(f"dx {dx}, dy {dy}, dz {dz}, step_rotation {step_rotation}")
+    print(f"dx {dx}, dy {dy}, dz {dz}, rotation {rotation}")
 
     # Update our estimated position based on our speed
     # Recall that the speed was given in cm/s in the vector (as per DJiTelloPy's doc), and
     # that we update the position every second, so we just divide by 100
+    # 100 cm in a meter, multiplied by one second (by default the command maintain time is one second)
     drone_piloter.update_position(
-        dx=dx / 100, dy=dy / 100, dz=dz / 100, rotation=rotation
+        dx=dx / 100 * COMMAND_MAINTAIN_TIME,
+        dy=dy / 100 * COMMAND_MAINTAIN_TIME,
+        dz=dz / 100 * COMMAND_MAINTAIN_TIME,
+        rotation=rotation,
     )
-    dx, dy, dz, rotation = 0, 0, 0, 0  # Reset
+    dx, dy, dz, rotation = 0, 0, 0, 0  # Reset memorized movement
 
     # If we have arrived at our destination, stop
     current_closest_cell = scene.octree.get_closest_cell_to_position(
@@ -176,4 +176,7 @@ while not stop:
         stop = True
         print("Timed out.")
 
+
+# Stop the drone and tell it to land
+drone_piloter.send_instructions(Vector((0, 0, 0)), speed=0)
 drone_piloter.land()
