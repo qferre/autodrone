@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(".")
 
 from autodrone.llm import RAG_LLMAgent
@@ -21,7 +22,9 @@ assert result == "Augustus"
 
 # Drone test
 my_rag_agent = RAG_LLMAgent(
-    model_name="mistralai/Mistral-7B-Instruct-v0.2", prompt_template_key="drone_loc"
+    # model_name="mistralai/Mistral-7B-Instruct-v0.2",
+    model_name="microsoft/phi-2",  # Try a smaller model, TODO make it default if it works well
+    prompt_template_key="drone_loc",
 )
 
 index = """

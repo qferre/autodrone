@@ -89,9 +89,6 @@ class Octree:
                 ray_is_blocked_at_this_position = blender_raycast(cell.center, n.center)
                 print(f"BLOCKING {ray_is_blocked_at_this_position}")
 
-                # TODO : do I really need to check if a cell is occupied if I raytrace ?
-
-                # if (not n.is_occupied) and (ray_is_blocked_at_this_position is None):
                 if ray_is_blocked_at_this_position is None:
                     print("Adding....")
                     G.add_edge(
