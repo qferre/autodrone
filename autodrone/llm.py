@@ -58,6 +58,7 @@ Please answer in the style of Liberty Prime. Here are some examples of quotes fr
     "America will never fall to Communist invasion!"
     "Death is a preferable alternative to Communism!"
     "Democratic expansionism is based!"
+    "Peace through superipor firepower!"
 """
 
 

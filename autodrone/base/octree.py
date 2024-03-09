@@ -5,15 +5,22 @@ from autodrone.base.mathutils import blender_raycast
 
 
 class OctreeNode:
-    def __init__(self, id, center, size):
-        self.id = id  # I need a unique id for later
-        self.center = center  # The center point of the node
-        self.size = size  # The size (side length) of the node
-        # NOTE : Each node is a CUBE, not a SPHERE !
+    def __init__(self, id: str, center: Vector, size: float):
+        """_summary_
 
-        self.children = (
-            None  # Eight children (sub-nodes). None if none were created yet.
-        )
+        Each node is a CUBE, not a SPHERE !
+
+        Args:
+            id (str): need a unique id for later
+            center (Vector): The center point of the node
+            size (float): The size (side length) of the node
+        """
+
+        self.id = id
+        self.center = center
+        self.size = size
+
+        self.children = None
 
         self.outgoing_graph_edges = 0
 
@@ -21,6 +28,14 @@ class OctreeNode:
         return f"Octree Node {self.id}, center {self.center}, size {self.size}, children {self.children}, outgoing_graph_edges {self.outgoing_graph_edges}"
 
     def subdivide(self, node_class=None):
+        """Subdivide the node into eight child nodes
+
+        Args:
+            node_class (_type_, optional): _description_. Defaults to None.
+
+        Raises:
+            ValueError: _description_
+        """
 
         if node_class is None:
             node_class = OctreeNode
@@ -54,14 +69,30 @@ class OctreeNode:
 
 
 class Octree:
-    def __init__(self, root_center, root_size, max_depth=13, node_class=OctreeNode):
+    def __init__(self, root_center:Vector, root_size:float, max_depth=13, node_class=OctreeNode):
+        """_summary_
+
+        Args:
+            root_center (Vector): _description_
+            root_size (float): _description_
+            max_depth (int, optional): _description_. Defaults to 13.
+            node_class (_type_, optional): _description_. Defaults to OctreeNode.
+        """
         self.root = node_class(center=root_center, size=root_size, id="root")
         self.max_depth = max_depth
 
-    def to_graph(self, dist_threshold, top_k_neighbors):
-        # Turn this into a networkx graph,
-        # NOTE this is done so I can use A Star which is integrated in networkx
+    def to_graph(self, dist_threshold:float, top_k_neighbors:int):
+        """
+        Turn this into a networkx graph,
+        NOTE this is done so I can use A Star which is integrated in networkx
 
+        Args:
+            dist_threshold (float): _description_
+            top_k_neighbors (int): _description_
+
+        Returns:
+            _type_: _description_
+        """
         # remove cells with children (ie. take only leaf nodes)
         # then just take neighboring cells and add a link between them
 

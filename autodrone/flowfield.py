@@ -11,14 +11,19 @@ from mathutils import Vector
 # --------------------- Flowfield, a special octree
 
 
-class OctreeVectorNode(OctreeNode):
-    """
-    Like an OctreeNode, but can also store a vector, and check if it is occupied.
-    """
 
-    def __init__(self, id, center, size):
+class OctreeVectorNode(OctreeNode):
+
+    def __init__(self, id, center:Vector, size:int):
+        """Like an OctreeNode, but can also store a vector, and check if it is occupied.
+
+        Args:
+            id (_type_): _description_
+            center (Vector): _description_
+            size (int): _description_
+        """
         super().__init__(id, center, size)
-        self.vector = Vector((0, 0, 0))
+        self.vector = Vector((0, 0, 0)) # Vector stored by the OctreeVectorNode and which gives it its name
         self._is_occupied = None  # Flag to indicate if this node is occupied by an obstacle. None at first if never evaluated
 
     @property
@@ -176,3 +181,5 @@ class FlowField(Octree):
             print(empty.rotation_euler)
 
         # NOTE : This code does not delete the visual representations yet
+
+

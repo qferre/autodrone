@@ -1,6 +1,5 @@
 """
-This must be run within Blender !
-TODO : blender interpreter by default has its workdir in the home dir when run from within Blender interface
+This must be run within Blender ! TODO assert that it was
 """
 
 import sys
@@ -23,9 +22,11 @@ from autodrone.pathfind import Pathfinder
 from autodrone.llm import RAG_LLMAgent
 
 # Blender modules
-import bpy
-from mathutils import Vector
-
+try:
+    import bpy
+    from mathutils import Vector
+except ImportError:
+    raise ImportError("Cannot find Blender modules. Did you run this script using the Blender Python interpreter?")
 
 # Argparser
 parser = ArgumentParserForBlender()
@@ -58,6 +59,7 @@ scene = SpaceRepresentation(max_depth_flowfield=3)
 llm_rag_agent = RAG_LLMAgent(
     model_name="mistralai/Mistral-7B-Instruct-v0.2", prompt_template_key="drone_loc"
 )
+index = read_text_file(args.index)
 llm_rag_agent.setup_retriever_for_this_context(text=index)
 """
 

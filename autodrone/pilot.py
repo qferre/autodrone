@@ -11,18 +11,15 @@ from mathutils import Vector
 
 
 class DronePiloter:
-    """
-    Class responsible for translating directions (given as a velocity vector)
-    into actual instructions for the drone.
-
-    Use the Tello drone for a proof of concept : https://github.com/damiafuentes/DJITelloPy
-    The Tello must be on the same WiFi as the computer running this code !
-
-    See https://github.com/damiafuentes/DJITelloPy/blob/master/examples/manual-control-pygame.py for source example
-    """
 
     def __init__(self, starting_position: Vector, debug_mode=False):
-        """_summary_
+        """
+        Class responsible for translating directions (given as a velocity vector) into actual instructions for the drone.
+
+        Use the Tello drone for a proof of concept : https://github.com/damiafuentes/DJITelloPy
+        The Tello must be on the same WiFi as the computer running this code !
+
+        See https://github.com/damiafuentes/DJITelloPy/blob/master/examples/manual-control-pygame.py for source example
 
         Args:
             starting_position (Vector, optional): _description_. Defaults to None.
