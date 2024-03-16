@@ -59,7 +59,6 @@ class Pathfinder:
         return path
 
     def local_avoidance_behavior(self, desired_path_vector):
-
         """
         # TODO : before implementing ORCA or depth estimation. Just stop if there is an obstacle at 1 m
         obstacle = raytrace_blender(desired_path_vector, max_distance=1m)

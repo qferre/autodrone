@@ -1,9 +1,4 @@
-"""
-This must be run within Blender ! TODO assert that it was
-"""
-
 import sys
-
 
 sys.path.append(".")  # necessary to import script from the blender python interpreter
 sys.path.append("..")
@@ -26,7 +21,9 @@ try:
     import bpy
     from mathutils import Vector
 except ImportError:
-    raise ImportError("Cannot find Blender modules. Did you run this script using the Blender Python interpreter?")
+    raise ImportError(
+        "Cannot find Blender modules. Did you run this script using the Blender Python interpreter?"
+    )
 
 # Argparser
 parser = ArgumentParserForBlender()

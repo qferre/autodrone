@@ -8,13 +8,14 @@ def euclidian_distance(a: tuple, b: tuple):
 
 
 def vector_to_euler(vector: Vector):
-    """_summary_
+    """Converts a 3D Vector to a Euler Quarternion. Blender's default orientation
+    is towards -Z, so use this for the conversion.
 
     Args:
-        vector (Vector): _description_
+        vector (Vector): Vector to be converted.
 
     Returns:
-        _type_: _description_
+        Euler quarternion
     """
     # Blender's default orientation is -Z
     return vector.to_track_quat("-Z").to_euler()
@@ -24,8 +25,8 @@ def project_on_plane(vector : Vector, normal: Vector):
     """Project the vector on the plan defined by the normal.
 
     Args:
-        vector (Vector): _description_
-        normal (Vector): _description_
+        vector (Vector): Vector to be projected.
+        normal (Vector): Vector defining the normal of the plane on which we project.
     """
     dot_product = np.dot(normal, vector)
     sub_vector = Vector(dot_product * normal)
@@ -33,16 +34,16 @@ def project_on_plane(vector : Vector, normal: Vector):
     return projected_vector
 
 
-def blender_create_cube(center, edge_size, name="Cube"):
-    """_summary_
+def blender_create_cube(center: Vector, edge_size:float, name="Cube"):
+    """Creates a cube within the Blender scene with the desired parameters.
 
     Args:
-        center (_type_): _description_
-        edge_size (_type_): _description_
-        name (str, optional): _description_. Defaults to "Cube".
+        center (Vector): Position of the cube center.
+        edge_size (float): Length of each edge
+        name (str, optional): Name of the object. Defaults to "Cube".
 
     Returns:
-        _type_: _description_
+        A reference to the newly created cube in Blender's Python API.
     """
     center = Vector(center)
 

@@ -1,9 +1,7 @@
 # AUTODRONE Project
 Automatic drone pathfinding and navigation
 
-A framework to allow drones to navigate and be issued commands.
---> 
-A Python framework to allow simple drones to pathfind and be issued commands. 
+A Python framework to allow simple drones to pathfind and be issued commands.
 
 
 ## Prerequisites

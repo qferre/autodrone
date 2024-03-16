@@ -28,10 +28,6 @@ class OctreeVectorNode(OctreeNode):
 
     @property
     def is_occupied(self):
-        # Calculate occupation if it was not calculated before
-        # TODO Should this be updateable ?
-        if self._is_occupied is None:
-            self._is_occupied = self.check_if_is_occupied()
         return self._is_occupied
 
     @is_occupied.setter
@@ -41,76 +37,6 @@ class OctreeVectorNode(OctreeNode):
     def __str__(self) -> str:
         return super().__str__() + f", is occupied {self.is_occupied}"
 
-    def check_if_is_occupied(self, face_points_subdivision=4):
-        """
-        If I draw a ray on one face towards the same point on the opposite face,
-        did I hit something ? Repeat this with face_points_subdivision number of points distributed on the face
-        Stop as soon as I do, as it means the cell is occupied.
-        """
-
-        cube = blender_create_cube(
-            center=self.center, edge_size=self.size
-        )  # Create a temporary cube encompassing the cell boundaries
-
-        # Iterate over the faces of the temporary cube (TODO only half)
-        for face in cube.data.polygons:
-            print("DEBUG FACE")
-            normal = face.normal
-
-            # TODO Check this code (from ChatGPT...) and move it to mathutils !
-
-            # TODO I THINK THIS IS BUGGY, ALL CELLS ARE MARKED AS OCCUPIED
-
-            def get_regular_points_on_face(face, num_points):
-                normal = face.normal
-                basis_1 = (
-                    normal.cross((0.0, 0.0, 1.0))
-                    if normal.z < 1
-                    else normal.cross((0.0, 1.0, 0.0))
-                )
-                basis_1.normalize()
-                basis_2 = normal.cross(basis_1)
-
-                sqrt_num_points = int(math.sqrt(num_points))
-                points = [
-                    (
-                        face.center[0]
-                        + basis_1[0] * (i % sqrt_num_points) / (sqrt_num_points - 1)
-                        + basis_2[0] * (i // sqrt_num_points) / (sqrt_num_points - 1),
-                        face.center[1]
-                        + basis_1[1] * (i % sqrt_num_points) / (sqrt_num_points - 1)
-                        + basis_2[1] * (i // sqrt_num_points) / (sqrt_num_points - 1),
-                        face.center[2]
-                        + basis_1[2] * (i % sqrt_num_points) / (sqrt_num_points - 1)
-                        + basis_2[2] * (i // sqrt_num_points) / (sqrt_num_points - 1),
-                    )
-                    for i in range(num_points)
-                ]
-                return points
-
-            # Calculate the start point of each ray and check if it hits anything
-            rays_to_be_cast = get_regular_points_on_face(
-                face=face, num_points=face_points_subdivision
-            )
-            for ray_origin in rays_to_be_cast:
-                print("Casting ray...")
-                result, location, normal, face_index = cube.ray_cast(
-                    ray_origin,
-                    normal,
-                    distance=self.size
-                    - 1e-2,  # Don't care if we hit something outside of the cell. Substract an epsilon to prevent hitting ourselves though
-                )
-
-                if result:
-                    bpy.data.objects.remove(
-                        cube, do_unlink=True
-                    )  # We no longer need the temporary cube.
-                    return True
-
-        bpy.data.objects.remove(
-            cube, do_unlink=True
-        )  # We no longer need the temporary cube.
-        return False
 
 
 class FlowField(Octree):

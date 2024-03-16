@@ -8,6 +8,7 @@ from autodrone.base.mathutils import (
 )
 
 from mathutils import Vector
+import math
 
 
 class DronePiloter:
@@ -79,11 +80,12 @@ class DronePiloter:
         )
 
         if not self.debug_mode:
-            # TODO BUG UNITS ARE NOT THE SAME, rotation is in radian and the drone function expects it in centidegrees
+            # NOTE rotation is in radians, and but drone function expects it in centidegrees
+            rotation_instruction = math.degrees(rotation) * 100
             if rotation > 0:
-                self.drone.rotate_counter_clockwise(rotation)
+                self.drone.rotate_counter_clockwise(rotation_instruction)
             else:
-                self.drone.rotate_clockwise(rotation)
+                self.drone.rotate_clockwise(rotation_instruction)
 
         # Then apply the velocity using height and pitch
         # We will almost never use roll (left-right velocity) manually, nor

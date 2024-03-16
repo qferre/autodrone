@@ -10,12 +10,17 @@ class SpaceRepresentation:
 
     def __init__(
         self,
-        origin_vector=Vector(
-            (0, 0, 5)
-        ),  # Default is center, 5m high, for our test scene.
-        scene_diameter=10,  # Default is 10m
+        origin_vector=Vector((0, 0, 5)),
+        scene_diameter=10,
         max_depth_flowfield=4,
     ):
+        """_summary_
+
+        Args:
+            origin_vector (_type_, optional): _description_. Defaults to Vector((0, 0, 5)) which representes center of the scene at 5m of height.
+            scene_diameter (int, optional): _description_. Defaults to 10.
+            max_depth_flowfield (int, optional): _description_. Defaults to 4.
+        """
 
         ## CREATE THE REPRESENTATION
         # Completely fill the space around me with an octree, and subdivide it when needed
@@ -30,9 +35,8 @@ class SpaceRepresentation:
     @staticmethod
     def _subdivide_flowfield(flowfield: FlowField):
         """
-        For the given flowfield, will recursively subdivide each cell if it's
-        occupied (a check will be run) and if it has not been divided before
-        (ie. has no child cells).
+        For the given flowfield, will recursively subdivide each cell if it has
+        not been divided before (ie. has no child cells).
         """
         depth = 0
         while depth < flowfield.max_depth:
@@ -40,7 +44,6 @@ class SpaceRepresentation:
             print(f"DIVIDING, {len(current_cells)}")
             for cell in current_cells:
                 print(f"DIV {cell}")
-                if cell.is_occupied and (cell.children is None):
-                    # if not cell.is_surrounded_by_occupied_cells(): # TODO Performance check : do not subdivide a cell surrounded by occupied cells.
+                if cell.children is None:
                     cell.subdivide(node_class=OctreeVectorNode)
             depth += 1

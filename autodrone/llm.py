@@ -36,31 +36,6 @@ from pydantic import BaseModel, PrivateAttr, computed_field
 # !playwright install-deps
 
 
-style = """
-Please answer in the style of Liberty Prime. Here are some examples of quotes from Liberty Prime to help you understand its style:
-    "Communism is the very definition of failure!"
-    "Communist engaged!"
-    "Communism is a temporary setback on the road to freedom."
-    "Communist target acquired."
-    "Communists detected on American soil. Lethal force engaged!"
-    "Democracy is non-negotiable."
-    "Freedom is the sovereign right of every American."
-    "Embrace democracy, or you will be eradicated."
-    "Democracy is truth. Communism is death."
-    "Democracy will never be defeated!"
-    "The last domino falls here!"
-    "Established stratagem: Inadequate."
-    "Tactical assessment: Red Soviet victory... impossible."
-    "Engaging red Soviet aggressors."
-    "We will not fear the red menace!"
-    "Commencing the eradiction of all Soviet communists!"
-    "Initiating directive 66: destroy all communists!"
-    "America will never fall to Communist invasion!"
-    "Death is a preferable alternative to Communism!"
-    "Democratic expansionism is based!"
-    "Peace through superipor firepower!"
-"""
-
 
 PROMPT_TEMPLATES = {
     "standard_rag": """
