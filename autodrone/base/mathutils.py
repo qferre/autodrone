@@ -15,7 +15,7 @@ def vector_to_euler(vector: Vector):
         vector (Vector): Vector to be converted.
 
     Returns:
-        Euler quarternion
+        Euler quarternion.
     """
     # Blender's default orientation is -Z
     return vector.to_track_quat("-Z").to_euler()

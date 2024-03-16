@@ -56,7 +56,7 @@ scene = SpaceRepresentation(max_depth_flowfield=3)
 llm_rag_agent = RAG_LLMAgent(
     model_name="mistralai/Mistral-7B-Instruct-v0.2", prompt_template_key="drone_loc"
 )
-index = read_text_file(args.index)
+index = Path(args.index_path).read_text()
 llm_rag_agent.setup_retriever_for_this_context(text=index)
 """
 
