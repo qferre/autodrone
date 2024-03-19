@@ -27,11 +27,25 @@ except ImportError:
 
 # Argparser
 parser = ArgumentParserForBlender()
-parser.add_argument("-sp", "--start_pos", type=str, required=True, help="")
+parser.add_argument(
+    "-sp",
+    "--start_pos",
+    type=str,
+    required=False,
+    help="""
+                    TODO""",
+    default=None,
+)
 args = parser.parse_args()
 
 
-start_position = Vector((float(i) for i in args.start_pos.split(",")))
+if args.start_pos is not None:
+    start_position = Vector((float(i) for i in args.start_pos.split(",")))
+else:
+    print(
+        "No start position specified. Defaulting to the positon of the 'Navigator' object, if it exists in the scene."
+    )
+    start_position = bpy.data.objects["Navigator"].location
 print(f"Start position: {start_position}")
 
 
@@ -52,23 +66,39 @@ scene = SpaceRepresentation(max_depth_flowfield=3)
 # ------------------------ Command interpretation ---------------------------- #
 # TODO  integrate the LLM module to translate input command into a position
 
-"""
+
 llm_rag_agent = RAG_LLMAgent(
     model_name="mistralai/Mistral-7B-Instruct-v0.2", prompt_template_key="drone_loc"
 )
 index = Path(args.index_path).read_text()
 llm_rag_agent.setup_retriever_for_this_context(text=index)
-"""
 
-user_input = input("Please enter your instructions: ")
+
+user_input = input(
+    "Please enter your instructions, or leave blank for a demonstration: "
+)
 # Continue the code after Enter is pressed
 print(f"You said: {user_input}. Your request will now be processed.")
 
-# target = llm_rag_agent(question=user_input)
-# Default to pre-set for now
-navigator = bpy.data.objects["Navigator"]
-target = bpy.data.objects["Destination"]
-start_position = navigator.location
+if user_input == "":
+    print(
+        "You returned an empty input. We will default to the position of the 'Destination' object if present in the scene."
+    )
+    target_position = bpy.data.objects["Destination"].location
+else:
+    target_position = llm_rag_agent(question=user_input)
+    # TODO Sanity checks !!!!
+    try:
+        target_position = Vector(target_position)
+    except:
+        raise ValueError(
+            f"""
+            Your instructions resulted in a position returned by the LLM that cannot be interpreted as a Vector.
+            Output of the LLM: {target_position}
+            """
+        )
+print(f"Target position: {target_position}")
+
 
 # TODO : the start position, for now, will be specified by command line I think.
 # The different query positions will be given in an index, and the LLM will just fetch the appropriate ones from this index.
@@ -85,7 +115,7 @@ drone_piloter = DronePiloter(
 
 # Now that we have the targets, compute the paths and populate the flowfield.
 scene.octree.populate_self(
-    endpos=target.location, pathfinder=pathfinder, top_k_neighbors_graph_conversion=8
+    endpos=target_position, pathfinder=pathfinder, top_k_neighbors_graph_conversion=8
 )
 scene.octree.produce_visualisation()
 
@@ -94,7 +124,7 @@ scene.octree.produce_visualisation()
 # the paths even if the starting position changes (that's the entire point of
 # the flowfield).
 
-destination_cell = scene.octree.get_closest_cell_to_position(target.location)
+destination_cell = scene.octree.get_closest_cell_to_position(target_position)
 
 
 # ------------------------------ Piloting ------------------------------------ #
