@@ -12,3 +12,4 @@ langchain
 bitsandbytes
 langchain-community
 sentence-transformers
+nest-asyncio

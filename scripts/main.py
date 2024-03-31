@@ -32,8 +32,15 @@ parser.add_argument(
     "--start_pos",
     type=str,
     required=False,
-    help="""
-                    TODO""",
+    help=""" Coordinates (in the scene) of the start position. Format : (x,y,z)""",
+    default=None,
+)
+parser.add_argument(
+    "-ip",
+    "--index_path",
+    type=str,
+    required=True,
+    help=""" Path to the index text file, each line giving a remarkable position in format: name\tx\ty\tz""",
     default=None,
 )
 args = parser.parse_args()
@@ -64,15 +71,10 @@ scene = SpaceRepresentation(max_depth_flowfield=3)
 
 
 # ------------------------ Command interpretation ---------------------------- #
-# TODO  integrate the LLM module to translate input command into a position
-
-
-llm_rag_agent = RAG_LLMAgent(
-    model_name="mistralai/Mistral-7B-Instruct-v0.2", prompt_template_key="drone_loc"
-)
-index = Path(args.index_path).read_text()
-llm_rag_agent.setup_retriever_for_this_context(text=index)
-
+# TODO Finish integration of the LLM module to translate input command into a position
+# The different query positions will be given in an index, and the LLM
+# will just fetch the appropriate ones from this index.
+# The path of the index should be an argument of the command line
 
 user_input = input(
     "Please enter your instructions, or leave blank for a demonstration: "
@@ -80,37 +82,45 @@ user_input = input(
 # Continue the code after Enter is pressed
 print(f"You said: {user_input}. Your request will now be processed.")
 
-if user_input == "":
+try:  # TODO This big try except is here until the LLM is setup properly
+    llm_rag_agent = RAG_LLMAgent(
+        model_name="mistralai/Mistral-7B-Instruct-v0.2", prompt_template_key="drone_loc"
+    )
+    index = Path(args.index_path).read_text()
+    llm_rag_agent.setup_retriever_for_this_context(text=index)
+
+    if user_input == "":
+        print(
+            "You returned an empty input. We will default to the position of the 'Destination' object if present in the scene."
+        )
+        target_position = bpy.data.objects["Destination"].location
+    else:
+        target_position = llm_rag_agent(question=user_input)
+        # TODO Sanity checks !
+        try:
+            target_position = Vector(target_position)
+        except:
+            raise ValueError(
+                f"""
+                Your instructions resulted in a position returned by the LLM that cannot be interpreted as a Vector.
+                Output of the LLM: {target_position}
+                """
+            )
+    print(f"Target position: {target_position}")
+except:
     print(
-        "You returned an empty input. We will default to the position of the 'Destination' object if present in the scene."
+        "Error setting up the LLM, likely due to NotImplementedError. We will instead use the position of the 'Destination' object until this is fixed."
     )
     target_position = bpy.data.objects["Destination"].location
-else:
-    target_position = llm_rag_agent(question=user_input)
-    # TODO Sanity checks !!!!
-    try:
-        target_position = Vector(target_position)
-    except:
-        raise ValueError(
-            f"""
-            Your instructions resulted in a position returned by the LLM that cannot be interpreted as a Vector.
-            Output of the LLM: {target_position}
-            """
-        )
-print(f"Target position: {target_position}")
 
-
-# TODO : the start position, for now, will be specified by command line I think.
-# The different query positions will be given in an index, and the LLM will just fetch the appropriate ones from this index.
-# The path of the index should be an argument of the command line
 
 # ----------------------------- Pathfinding ---------------------------------- #
 
 # Initialize modules
 pathfinder = Pathfinder()
 drone_piloter = DronePiloter(
-    starting_position=start_position,  ### aaaaaa
-    debug_mode=True,  # DO NOT KEEP THIS
+    starting_position=start_position,
+    debug_mode=True,  # TODO Remove this argument to test on a real drone
 )
 
 # Now that we have the targets, compute the paths and populate the flowfield.
@@ -139,11 +149,8 @@ while not stop:
     # We use it to get a velocity vector towards next waypoint. Then, we combine
     # it with a local avoidance which corrects this vector to ensure we don't
     # bump into anything.
-    """
-    The info for local avoidance is given only by DPT, I think ; I don't think
-    we need to update the scene represetnation by adding obstacls unless they
-    are massive, new, and immobile, otherwise
-    """
+    # I don't think we need to update the scene representation by adding
+    # obstacles unless they are massive, new, and immobile.
 
     # My pathing_vector is the vector (in the flowfield) of the cell I am
     # currently standing inside of.
