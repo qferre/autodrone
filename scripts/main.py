@@ -32,7 +32,7 @@ parser.add_argument(
     "--start_pos",
     type=str,
     required=False,
-    help=""" Coordinates (in the scene) of the start position. Format : (x,y,z)""",
+    help=""" Coordinates (in the scene) of the start position. Format : x,y,z""",
     default=None,
 )
 parser.add_argument(
@@ -48,6 +48,7 @@ args = parser.parse_args()
 
 if args.start_pos is not None:
     start_position = Vector((float(i) for i in args.start_pos.split(",")))
+    # TODO Seems there is a bug when it is specified, that it goes to the wrong cell which has a (0,0,0) vector of movement.
 else:
     print(
         "No start position specified. Defaulting to the positon of the 'Navigator' object, if it exists in the scene."
@@ -193,7 +194,7 @@ while not stop:
         dz=dz / 100 * COMMAND_MAINTAIN_TIME,
         rotation=rotation,
     )
-    dx, dy, dz, rotation = 0, 0, 0, 0  # Reset memorized movement
+    # dx, dy, dz, rotation = 0, 0, 0, 0  # Reset memorized movement
 
     # If we have arrived at our destination, stop
     current_closest_cell = scene.octree.get_closest_cell_to_position(
